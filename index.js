@@ -111,7 +111,7 @@ async function connectToWA() {
 `;
 
       await vima.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://raw.githubusercontent.com/DANUWA-MD/DANUWA-MD/main/images/DANUWA-MD.png` },
+        image: { url: `https://raw.githubusercontent.com/gaveshvimanshana101-sket/VIMA-MD/refs/heads/main/Image/file_00000000d22c71faade3c1e62f1313ae.png` },
         caption: up
       });
 
