@@ -27,7 +27,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 const prefix = '.';
-const ownerNumber = ['94776121326'];
+const ownerNumber = ['94789706579'];
 const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 
 async function ensureSessionFile() {
@@ -64,6 +64,7 @@ async function ensureSessionFile() {
 
 async function connectToWA() {
   console.log("Connecting VIMA-MD 🧬...");
+
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -80,16 +81,20 @@ async function connectToWA() {
 
   vima.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update;
+
     if (connection === 'close') {
       if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
         connectToWA();
       }
+
     } else if (connection === 'open') {
+
       console.log('✅ VIMA-MD connected to WhatsApp');
 
       const up = `VIMA-MD connected ✅\n\nPREFIX: ${prefix}`;
-      await danuwa.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/DANUWA-MD/DANUWA-MD/blob/main/images/DANUWA-MD.png?raw=true` },
+
+      await vima.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
+        image: { url: `https://raw.githubusercontent.com/DANUWA-MD/DANUWA-MD/main/images/DANUWA-MD.png` },
         caption: up
       });
 
@@ -98,12 +103,14 @@ async function connectToWA() {
           require(`./plugins/${plugin}`);
         }
       });
+
     }
   });
 
-  danuwa.ev.on('creds.update', saveCreds);
+  vima.ev.on('creds.update', saveCreds);
 
-  danuwa.ev.on('messages.upsert', async ({ messages }) => {
+  vima.ev.on('messages.upsert', async ({ messages }) => {
+
     for (const msg of messages) {
       if (msg.messageStubType === 68) {
         await vima.sendMessageAck(msg.key);
@@ -113,19 +120,37 @@ async function connectToWA() {
     const mek = messages[0];
     if (!mek || !mek.message) return;
 
-    mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
+    mek.message = getContentType(mek.message) === 'ephemeralMessage'
+      ? mek.message.ephemeralMessage.message
+      : mek.message;
+
     if (mek.key.remoteJid === 'status@broadcast') return;
 
     const m = sms(vima, mek);
+
     const type = getContentType(mek.message);
     const from = mek.key.remoteJid;
-    const body = type === 'conversation' ? mek.message.conversation : mek.message[type]?.text || mek.message[type]?.caption || '';
+
+    const body =
+      type === 'conversation'
+        ? mek.message.conversation
+        : mek.message[type]?.text ||
+          mek.message[type]?.caption ||
+          '';
+
     const isCmd = body.startsWith(prefix);
-    const commandName = isCmd ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase() : '';
+
+    const commandName = isCmd
+      ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase()
+      : '';
+
     const args = body.trim().split(/ +/).slice(1);
     const q = args.join(' ');
 
-    const sender = mek.key.fromMe ? vima.user.id : (mek.key.participant || mek.key.remoteJid);
+    const sender = mek.key.fromMe
+      ? vima.user.id
+      : (mek.key.participant || mek.key.remoteJid);
+
     const senderNumber = sender.split('@')[0];
     const isGroup = from.endsWith('@g.us');
     const botNumber = vima.user.id.split(':')[0];
@@ -134,26 +159,59 @@ async function connectToWA() {
     const isOwner = ownerNumber.includes(senderNumber) || isMe;
     const botNumber2 = await jidNormalizedUser(vima.user.id);
 
-    const groupMetadata = isGroup ? await vima.groupMetadata(from).catch(() => {}) : '';
+    const groupMetadata = isGroup
+      ? await vima.groupMetadata(from).catch(() => {})
+      : '';
+
     const groupName = isGroup ? groupMetadata.subject : '';
     const participants = isGroup ? groupMetadata.participants : '';
     const groupAdmins = isGroup ? await getGroupAdmins(participants) : '';
     const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
     const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
 
-    const reply = (text) => vima.sendMessage(from, { text }, { quoted: mek });
+    const reply = (text) =>
+      vima.sendMessage(from, { text }, { quoted: mek });
 
     if (isCmd) {
-      const cmd = commands.find((c) => c.pattern === commandName || (c.alias && c.alias.includes(commandName)));
+
+      const cmd = commands.find(
+        (c) =>
+          c.pattern === commandName ||
+          (c.alias && c.alias.includes(commandName))
+      );
+
       if (cmd) {
-        if (cmd.react) vima.sendMessage(from, { react: { text: cmd.react, key: mek.key } });
+        if (cmd.react)
+          vima.sendMessage(from, {
+            react: { text: cmd.react, key: mek.key }
+          });
+
         try {
           cmd.function(vima, mek, m, {
-            from, quoted: mek, body, isCmd, command: commandName, args, q,
-            isGroup, sender, senderNumber, botNumber2, botNumber, pushname,
-            isMe, isOwner, groupMetadata, groupName, participants, groupAdmins,
-            isBotAdmins, isAdmins, reply,
+            from,
+            quoted: mek,
+            body,
+            isCmd,
+            command: commandName,
+            args,
+            q,
+            isGroup,
+            sender,
+            senderNumber,
+            botNumber2,
+            botNumber,
+            pushname,
+            isMe,
+            isOwner,
+            groupMetadata,
+            groupName,
+            participants,
+            groupAdmins,
+            isBotAdmins,
+            isAdmins,
+            reply
           });
+
         } catch (e) {
           console.error("[PLUGIN ERROR]", e);
         }
@@ -161,18 +219,27 @@ async function connectToWA() {
     }
 
     const replyText = body;
+
     for (const handler of replyHandlers) {
       if (handler.filter(replyText, { sender, message: mek })) {
         try {
-          await handler.function(danuwa, mek, m, {
-            from, quoted: mek, body: replyText, sender, reply,
+
+          await handler.function(vima, mek, m, {
+            from,
+            quoted: mek,
+            body: replyText,
+            sender,
+            reply
           });
+
           break;
+
         } catch (e) {
           console.log("Reply handler error:", e);
         }
       }
     }
+
   });
 }
 
@@ -182,4 +249,6 @@ app.get("/", (req, res) => {
   res.send("Hey, VIMA-MD started✅");
 });
 
-app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
+app.listen(port, () =>
+  console.log(`Server listening on http://localhost:${port}`)
+);
