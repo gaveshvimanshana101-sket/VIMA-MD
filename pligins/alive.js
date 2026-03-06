@@ -1,25 +1,19 @@
-const { cmd, commands } = require('../command');
-const config = require('../config');
+module.exports = {
+name: "alive",
+pattern: "alive",
+react: "✅",
+desc: "Check bot alive",
 
-cmd({
-    pattern: "alive",
-    desc: "Check bot online or no.",
-    category: "main",
-    filename: __filename
-},
-async (vima, mek, m, {
-    from, quoted, body, isCmd, command, args, q, isGroup,
-    sender, senderNumber, botNumber2, botNumber, pushname,
-    isMe, isOwner, groupMetadata, groupName, participants,
-    groupAdmins, isBotAdmins, isAdmins, reply
-}) => {
-    try {
-        return await vima.sendMessage(from, {
-            image: { url: config.ALIVE_IMG },
-            caption: config.ALIVE_MSG
-        }, { quoted: mek });
-    } catch (e) {
-        console.log(e);
-        reply(`${e}`);
-    }
-});
+async function(vima, mek, m, { reply }) {
+
+reply(`🤖 *VIMA-MD BOT*
+
+Status : Online ✅
+Owner : Vima
+Version : 1.0
+
+Bot is working properly 🚀`);
+
+}
+
+};
