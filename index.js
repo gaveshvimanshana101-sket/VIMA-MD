@@ -91,7 +91,16 @@ async function connectToWA() {
 
       console.log('✅ VIMA-MD connected to WhatsApp');
 
-      const up = `VIMA-MD connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `
+╭━━〔 VIMA-MD CONNECTED 🤖 〕━━⬣
+│
+│ 👑 Owner : Vima
+│ 📱 Number : 94789706579
+│ ⚡ Prefix : ${prefix}
+│ 📡 Status : Online
+│
+╰━━━━━━━━━━━━━━━━━━⬣
+`;
 
       await vima.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://raw.githubusercontent.com/DANUWA-MD/DANUWA-MD/main/images/DANUWA-MD.png` },
@@ -110,12 +119,6 @@ async function connectToWA() {
   vima.ev.on('creds.update', saveCreds);
 
   vima.ev.on('messages.upsert', async ({ messages }) => {
-
-    for (const msg of messages) {
-      if (msg.messageStubType === 68) {
-        await vima.sendMessageAck(msg.key);
-      }
-    }
 
     const mek = messages[0];
     if (!mek || !mek.message) return;
@@ -154,20 +157,9 @@ async function connectToWA() {
     const senderNumber = sender.split('@')[0];
     const isGroup = from.endsWith('@g.us');
     const botNumber = vima.user.id.split(':')[0];
-    const pushname = mek.pushName || 'Sin Nombre';
+    const pushname = mek.pushName || 'User';
     const isMe = botNumber.includes(senderNumber);
     const isOwner = ownerNumber.includes(senderNumber) || isMe;
-    const botNumber2 = await jidNormalizedUser(vima.user.id);
-
-    const groupMetadata = isGroup
-      ? await vima.groupMetadata(from).catch(() => {})
-      : '';
-
-    const groupName = isGroup ? groupMetadata.subject : '';
-    const participants = isGroup ? groupMetadata.participants : '';
-    const groupAdmins = isGroup ? await getGroupAdmins(participants) : '';
-    const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
-    const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
 
     const reply = (text) =>
       vima.sendMessage(from, { text }, { quoted: mek });
@@ -181,34 +173,18 @@ async function connectToWA() {
       );
 
       if (cmd) {
-        if (cmd.react)
-          vima.sendMessage(from, {
-            react: { text: cmd.react, key: mek.key }
-          });
-
         try {
           cmd.function(vima, mek, m, {
             from,
-            quoted: mek,
             body,
-            isCmd,
             command: commandName,
             args,
             q,
             isGroup,
             sender,
             senderNumber,
-            botNumber2,
-            botNumber,
             pushname,
-            isMe,
             isOwner,
-            groupMetadata,
-            groupName,
-            participants,
-            groupAdmins,
-            isBotAdmins,
-            isAdmins,
             reply
           });
 
@@ -217,29 +193,6 @@ async function connectToWA() {
         }
       }
     }
-
-    const replyText = body;
-
-    for (const handler of replyHandlers) {
-      if (handler.filter(replyText, { sender, message: mek })) {
-        try {
-
-          await handler.function(vima, mek, m, {
-            from,
-            quoted: mek,
-            body: replyText,
-            sender,
-            reply
-          });
-
-          break;
-
-        } catch (e) {
-          console.log("Reply handler error:", e);
-        }
-      }
-    }
-
   });
 }
 
