@@ -4,20 +4,41 @@ const replyHandlers = [];
 module.exports = { commands, replyHandlers };
 
 
-// PING
+// ALIVE COMMAND
+commands.push({
+pattern: "alive",
+alias: ["online","bot"],
+react: "🤖",
+function: async (vima, mek, m, { reply, pushname }) => {
+
+reply(`╭━━〔 VIMA-MD 〕━━╮
+
+👋 Hello ${pushname}
+
+🤖 Bot Status : Online
+⚡ Version : V1
+👑 Owner : Vima
+
+╰━━━━━━━━━━━━━━╯`);
+
+}
+});
+
+
+// PING COMMAND
 commands.push({
 pattern: "ping",
 alias: ["speed"],
 react: "⚡",
 function: async (vima, mek, m, { reply }) => {
 
-reply("🏓 Pong! Bot is working.");
+reply("🏓 Pong! Bot is working ⚡");
 
 }
 });
 
 
-// OWNER
+// OWNER COMMAND
 commands.push({
 pattern: "owner",
 react: "👑",
@@ -32,32 +53,14 @@ Number : 94789706579`);
 });
 
 
-// ALIVE
-commands.push({
-pattern: "alive",
-react: "🤖",
-function: async (vima, mek, m, { reply }) => {
-
-reply(`🤖 *VIMA MD BOT*
-
-Status : Online ✅
-Version : 1.0
-Owner : Vima
-
-Bot is running successfully 🚀`);
-
-}
-});
-
-
-// MENU
+// MENU COMMAND
 commands.push({
 pattern: "menu",
 react: "📜",
 function: async (vima, mek, m, { reply }) => {
 
 reply(`
-╭━━〔 *VIMA-MD MENU* 〕━━╮
+╭━━〔 VIMA-MD MENU 〕━━╮
 
 🤖 .alive
 ⚡ .ping
