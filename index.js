@@ -92,14 +92,22 @@ async function connectToWA() {
       console.log('✅ VIMA-MD connected to WhatsApp');
 
       const up = `
-╭━━〔 VIMA-MD CONNECTED 🤖 〕━━⬣
-│
-│ 👑 Owner : Vima
-│ 📱 Number : 94789706579
-│ ⚡ Prefix : ${prefix}
-│ 📡 Status : Online
-│
-╰━━━━━━━━━━━━━━━━━━⬣
+╭━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   🤖 VIMA-MD BOT ONLINE   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯
+
+👑 Owner   : Vima
+📱 Number  : 94789706579
+⚡ Prefix  : ${prefix}
+📡 Status  : Online ✅
+🧬 Version : V1
+
+━━━━━━━━━━━━━━━━━━━━━━━
+🚀 Bot Successfully Connected
+💡 Ready To Execute Commands
+━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ Powered By VIMA-MD
 `;
 
       await vima.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
